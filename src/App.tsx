@@ -8,9 +8,9 @@ import { aboutText, assets, profile, projects, services, type Project } from './
 function HeroSection({ contact }: { contact: () => void }) {
   return <section className="hero" aria-label="Introduction" id="top">
     <FadeIn y={-20} className="relative z-20"><nav className="hero-nav" aria-label="Main navigation">
-      <a href="#about">About</a><a href="#services">Price</a><a href="#projects">Projects</a><button onClick={contact}>Contact</button>
+      <a href="#about">ABOUT</a><a href="#projects">WORKS</a><a href="#work-reel">VIDEO REELS</a><button onClick={contact}>CONTACT</button>
     </nav></FadeIn>
-    <div className="heading-clip"><FadeIn delay={.15} y={40}><h1 className="hero-heading hero-title">Hi, i&apos;m {profile.name}</h1></FadeIn></div>
+    <div className="heading-clip"><FadeIn delay={.15} y={40}><h1 className="hero-heading hero-title">PYY · AI VISUALS</h1></FadeIn></div>
     <div className="hero-portrait"><FadeIn delay={.6} y={30}><Magnet><Image src={assets.portrait} alt="Jack, 3D creator" className="portrait-image" eager /></Magnet></FadeIn></div>
     <div className="hero-bottom"><FadeIn delay={.35} y={20}><p>a 3d creator driven by crafting striking and unforgettable projects</p></FadeIn><FadeIn delay={.5} y={20}><ContactButton onClick={contact} /></FadeIn></div>
     <a href="#work-reel" className="scroll-cue" aria-label="Scroll to work reel"><ArrowDown size={16} /></a>
