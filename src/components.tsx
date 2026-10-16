@@ -12,10 +12,10 @@ export function FadeIn({ children, delay = 0, duration = .7, x = 0, y = 30, clas
 }
 
 export function ContactButton({ onClick }: { onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="contact-button">Contact Me <ArrowUpRight size={18} aria-hidden="true" /></button>;
+  return <button type="button" onClick={onClick} className="contact-button">欢迎沟通 <ArrowUpRight size={18} aria-hidden="true" /></button>;
 }
 
-export function Magnet({ children, padding = 150, strength = 3, activeTransition = 'transform 0.3s ease-out', inactiveTransition = 'transform 0.6s ease-in-out' }: { children: ReactNode; padding?: number; strength?: number; activeTransition?: string; inactiveTransition?: string }) {
+export function Magnet({ children, padding = 150, strength = 3, maxX = Infinity, maxYUp = Infinity, maxYDown = Infinity, activeTransition = 'transform 0.3s ease-out', inactiveTransition = 'transform 0.6s ease-in-out' }: { children: ReactNode; padding?: number; strength?: number; maxX?: number; maxYUp?: number; maxYDown?: number; activeTransition?: string; inactiveTransition?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const { reduced } = useMotionPreference();
   useEffect(() => {
@@ -39,7 +39,9 @@ export function Magnet({ children, padding = 150, strength = 3, activeTransition
       const y = pointerY - rect.top - rect.height / 2;
       if (rect.width && rect.height && Math.abs(x) < rect.width / 2 + padding && Math.abs(y) < rect.height / 2 + padding) {
         child.style.transition = activeTransition;
-        child.style.transform = `translate3d(${x / strength}px,${y / strength}px,0)`;
+        const translateX = Math.max(-maxX, Math.min(maxX, x / strength));
+        const translateY = Math.max(-maxYUp, Math.min(maxYDown, y / strength));
+        child.style.transform = `translate3d(${translateX}px,${translateY}px,0)`;
       } else reset();
     };
     const move = (event: MouseEvent) => {
@@ -54,7 +56,7 @@ export function Magnet({ children, padding = 150, strength = 3, activeTransition
     window.addEventListener('blur', reset);
     window.addEventListener('scroll', reset, { passive: true });
     return () => { window.removeEventListener('mousemove', move); window.removeEventListener('pointermove', move); document.removeEventListener('mouseleave', reset); window.removeEventListener('blur', reset); window.removeEventListener('scroll', reset); reset(); };
-  }, [reduced, padding, strength, activeTransition, inactiveTransition]);
+  }, [reduced, padding, strength, maxX, maxYUp, maxYDown, activeTransition, inactiveTransition]);
   return <div ref={ref} className="magnet"><div style={{ willChange: 'transform' }}>{children}</div></div>;
 }
 function Character({ children, progress, start, end }: { children: string; progress: MotionValue<number>; start: number; end: number }) {
@@ -67,9 +69,13 @@ export function AnimatedText({ text }: { text: string }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.8', 'end 0.2'] });
   const revealProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: .001 });
   let position = 0;
-  return <p ref={ref} className="about-copy"><span className="sr-only">{text}</span><span aria-hidden="true">{reduced ? text : text.split(' ').map((word, wordIndex) => {
-    const start = position; position += word.length + 1;
-    return <span key={wordIndex}><span className="inline-block">{[...word].map((char, i) => <Character key={i} progress={revealProgress} start={(start + i) / text.length} end={(start + i + 1) / text.length}>{char}</Character>)}</span>{' '}</span>;
+  return <p ref={ref} className="about-copy"><span className="sr-only">{text}</span><span aria-hidden="true">{text.split('\n').map((line, lineIndex) => {
+    if (lineIndex > 0) position += 1;
+    if (reduced) return <span className="about-line" key={lineIndex}>{line}</span>;
+    return <span className="about-line" key={lineIndex}>{line.split(' ').map((word, wordIndex) => {
+      const start = position; position += word.length + 1;
+      return <span key={wordIndex}><span className="inline-block">{[...word].map((char, i) => <Character key={i} progress={revealProgress} start={(start + i) / text.length} end={(start + i + 1) / text.length}>{char}</Character>)}</span>{' '}</span>;
+    })}</span>;
   })}</span></p>;
 }
 
