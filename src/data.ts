@@ -12,7 +12,7 @@ const assets = {
 };
 
 // Replace these values with your own details. Empty project URLs open a preview.
-export const profile = { name: '彭袁熠', email: '3526642834@qq.com' };
+export const profile = { name: '知圆子', email: '3526642834@qq.com' };
 export const heroHand = mediaAsset('hero-hand.png');
 export const heroCharacter = mediaAsset('hero-character.png');
 export const reelVideos = [
