@@ -84,7 +84,7 @@ export function Image({ src, alt, className = '', eager = false }: { src: string
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   // Keep the image visible independently of load events, React effects and HMR.
   // Entry animations belong to the surrounding FadeIn, not the image resource.
-  return !src || failedSrc === src ? <div role={alt ? 'img' : undefined} aria-label={alt || undefined} aria-hidden={!alt || undefined} className={`image-fallback ${className}`}><div className="fallback-sculpture" />{alt && <span>{alt}</span>}</div> : <img src={src} alt={alt} className={className} loading={eager ? 'eager' : 'lazy'} decoding="async" onError={() => setFailedSrc(src)} />;
+  return !src || failedSrc === src ? <div role={alt ? 'img' : undefined} aria-label={alt || undefined} aria-hidden={!alt || undefined} className={`image-fallback ${className}`}><div className="fallback-sculpture" />{alt && <span>{alt}</span>}</div> : <img src={src} alt={alt} className={className} loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false} onContextMenu={event => event.preventDefault()} onError={() => setFailedSrc(src)} />;
 }
 export function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   const ref = useRef<HTMLElement>(null);

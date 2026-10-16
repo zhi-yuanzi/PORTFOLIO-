@@ -59,7 +59,7 @@ function ReelVideo({ src, label, hidden }: { src: string; label: string; hidden:
     observer.observe(video);
     return () => observer.disconnect();
   }, []);
-  return <video ref={ref} src={src} muted loop playsInline preload="metadata" tabIndex={-1} aria-label={hidden ? undefined : label} aria-hidden={hidden || undefined} />;
+  return <video ref={ref} src={src} muted loop playsInline preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback" disablePictureInPicture onContextMenu={event => event.preventDefault()} tabIndex={-1} aria-label={hidden ? undefined : label} aria-hidden={hidden || undefined} />;
 }
 
 function AboutSection({ contact }: { contact: () => void }) {
@@ -145,7 +145,7 @@ function SilentPreview({ src, poster, pauseMs = 0, label }: { src: string; poste
 
   return <div className="project-main-media">
     {poster && <img className="project-video-poster" src={poster} alt="" aria-hidden="true" />}
-    <video ref={videoRef} className={`project-main-video${ready ? ' is-ready' : ''}`} src={src} poster={poster} muted loop={!pauseMs} playsInline preload="metadata" onLoadedData={() => setReady(true)} onPlaying={() => setReady(true)} onWaiting={() => setReady(false)} onStalled={() => setReady(false)} onEmptied={() => setReady(false)} onError={() => setReady(false)} onPause={recoverFromPause} onEnded={restart} aria-label={label} />
+    <video ref={videoRef} className={`project-main-video${ready ? ' is-ready' : ''}`} src={src} poster={poster} muted loop={!pauseMs} playsInline preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback" disablePictureInPicture onContextMenu={event => event.preventDefault()} onLoadedData={() => setReady(true)} onPlaying={() => setReady(true)} onWaiting={() => setReady(false)} onStalled={() => setReady(false)} onEmptied={() => setReady(false)} onError={() => setReady(false)} onPause={recoverFromPause} onEnded={restart} aria-label={label} />
   </div>;
 }
 function ProjectsSection({ onOpen }: { onOpen: (project: Project) => void }) {
@@ -176,7 +176,7 @@ function AboutProfile() {
 
 function ProjectPreview({ project }: { project: Project }) {
   const artwork = (src: string, index: number) => src ? <Image key={`${src}-${index}`} src={src} alt={`${project.name} — artwork ${index + 1}`} eager /> : <div key={index} role="img" aria-label={`${project.name} — artwork ${index + 1} placeholder`} className="project-placeholder" />;
-  return <><p className="preview-caption">Project preview · {project.discipline}</p><div className="preview-gallery">{project.video ? <>{artwork(project.images[0], 0)}<video className="preview-video" src={project.video} poster={project.videoPoster} controls playsInline preload="metadata" aria-label={`${project.name} — video preview`} />{project.images.slice(1).map((src, index) => artwork(src, index + 1))}{project.audio && <div className="preview-audio"><span>《逆光上场》完整音频</span><audio src={project.audio} controls preload="metadata" aria-label={`${project.name} — full audio`} /></div>}</> : project.images.map(artwork)}</div></>;
+  return <><p className="preview-caption">Project preview · {project.discipline}</p><div className="preview-gallery">{project.video ? <>{artwork(project.images[0], 0)}<video className="preview-video" src={project.video} poster={project.videoPoster} controls playsInline preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback" disablePictureInPicture onContextMenu={event => event.preventDefault()} aria-label={`${project.name} — video preview`} />{project.images.slice(1).map((src, index) => artwork(src, index + 1))}{project.audio && <div className="preview-audio"><span>《逆光上场》完整音频</span><audio src={project.audio} controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback" onContextMenu={event => event.preventDefault()} aria-label={`${project.name} — full audio`} /></div>}</> : project.images.map(artwork)}</div></>;
 }
 
 export default function App() {
@@ -184,6 +184,20 @@ export default function App() {
   const [contactOpen, setContactOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const contact = () => setContactOpen(true);
+  useEffect(() => {
+    const stopMediaSaveMenu = (event: MouseEvent) => {
+      if ((event.target as HTMLElement | null)?.closest('img, video, audio')) event.preventDefault();
+    };
+    const stopMediaDrag = (event: DragEvent) => {
+      if ((event.target as HTMLElement | null)?.closest('img, video')) event.preventDefault();
+    };
+    document.addEventListener('contextmenu', stopMediaSaveMenu);
+    document.addEventListener('dragstart', stopMediaDrag);
+    return () => {
+      document.removeEventListener('contextmenu', stopMediaSaveMenu);
+      document.removeEventListener('dragstart', stopMediaDrag);
+    };
+  }, []);
   return <><a href="#about" className="skip-link">Skip to content</a><main className="site-wrapper"><HeroSection contact={contact} /><MarqueeSection /><AboutSection contact={contact} /><ServicesSection /><ProjectsSection onOpen={setSelectedProject} /><footer id="contact" className="site-footer"><div><span className="eyebrow">期待获得面试机会</span><button className="footer-cta" onClick={contact}>欢迎与我交流 <ArrowUpRight aria-hidden="true" /></button></div><div className="footer-bottom"><span>© {new Date().getFullYear()} {profile.name}.ai视频作品板块</span><button type="button" className="motion-toggle" onClick={toggle} aria-pressed={!reduced} aria-label="Enable animations">Motion {reduced ? 'off' : 'on'}</button><a href="#top">Back to top ↑</a></div></footer></main><AnimatePresence>{contactOpen && <Modal key="contact" title="About Me" onClose={() => setContactOpen(false)}><AboutProfile /></Modal>}{selectedProject && <Modal key="project" title={selectedProject.name} onClose={() => setSelectedProject(null)}><ProjectPreview project={selectedProject} /></Modal>}</AnimatePresence></>;
 }
 
